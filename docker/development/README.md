@@ -84,6 +84,25 @@ the floating `:8` tag. ZUGFeRD e-invoicing needs the `facturxXml` field that
 Gotenberg added in 8.34.0, so the dev stack must not silently run an older 8.x
 image. Keep the pin at 8.34 or newer when bumping it.
 
+## Checking a Hybrid PDF by hand
+
+With the Gotenberg-enabled stack running, set the instance PDF driver to
+Gotenberg (**Admin → PDF Generation**), enable E-Invoicing and fill in the bank
+details for the company (**Settings → E-Invoice**), then download any invoice
+whose data the readiness indicator accepts. The downloaded file is a Hybrid PDF:
+
+```bash
+# The embedded e-invoice is a PDF attachment named factur-x.xml
+pdfdetach -list invoice.pdf
+
+# Extract and read it
+pdfdetach -save 1 -o factur-x.xml invoice.pdf && head factur-x.xml
+```
+
+`pdfdetach` ships with poppler-utils. An invoice the builder reports missing
+requirements for downloads as an ordinary PDF with no attachment — that is the
+Fallback, not a failure.
+
 ## Advanced Compose usage
 
 The six Compose definitions in this directory cover all three databases, with

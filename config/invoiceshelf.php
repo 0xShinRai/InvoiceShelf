@@ -308,6 +308,16 @@ return [
             'model' => Expense::class,
         ],
         [
+            'title' => 'settings.menu_title.e_invoice',
+            'group' => '',
+            'name' => 'E-Invoice',
+            'link' => '/admin/settings/e-invoice',
+            'icon' => 'DocumentCheckIcon',
+            'owner_only' => true,
+            'ability' => '',
+            'model' => '',
+        ],
+        [
             'title' => 'settings.mail.company_mail_config',
             'group' => '',
             'name' => 'Mail Configuration',

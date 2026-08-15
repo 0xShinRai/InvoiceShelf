@@ -1000,7 +1000,23 @@
       "address_information": "Address Information",
       "pdf_generation": "PDF Generation",
       "appearance": "Appearance",
-      "module_configuration": "Module Configuration"
+      "module_configuration": "Module Configuration",
+      "e_invoice": "E-Invoice"
+    },
+    "e_invoice": {
+      "title": "E-Invoice",
+      "description": "Issue your invoices as ZUGFeRD e-invoices and provide the bank details they must carry.",
+      "enable": "Enable e-invoicing",
+      "enable_desc": "Every invoice PDF of this company becomes a Hybrid PDF with embedded EN 16931 XML.",
+      "requires_pdf_driver": "E-invoicing requires the {driver} PDF driver. Switch the instance-wide PDF driver in Admin → PDF Generation to enable these settings.",
+      "bank_details": "Bank details",
+      "bank_details_desc": "The payment details EN 16931 expects in the e-invoice XML.",
+      "iban": "IBAN",
+      "bic": "BIC",
+      "bank_name": "Bank name",
+      "iban_invalid": "Enter a valid IBAN (e.g. DE02120300000000202051).",
+      "bic_invalid": "Enter a valid BIC (8 or 11 characters, e.g. BYLADEM1001).",
+      "bank_name_max_length": "Bank name should not be greater than 255 characters."
     },
     "appearance": {
       "title": "Appearance",

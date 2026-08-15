@@ -58,6 +58,17 @@ class TaxTypeRequest extends FormRequest
                     TaxType::TRANSACTION_TYPE_PURCHASES,
                 ]),
             ],
+            'tax_category_code' => [
+                'sometimes',
+                'required',
+                'string',
+                Rule::in(TaxType::TAX_CATEGORY_CODES),
+            ],
+            'tax_exemption_reason' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
         ];
 
         if ($this->isMethod('PUT')) {
@@ -90,6 +101,19 @@ class TaxTypeRequest extends FormRequest
                 );
             }
         });
+
+        $validator->after(function (Validator $validator): void {
+            if ($validator->errors()->isNotEmpty() || ! $this->requiresTaxExemptionReason()) {
+                return;
+            }
+
+            if (trim((string) $this->effectiveTaxExemptionReason()) === '') {
+                $validator->errors()->add(
+                    'tax_exemption_reason',
+                    'An exemption reason is required for exempt tax category codes.'
+                );
+            }
+        });
     }
 
     public function getTaxTypePayload()
@@ -99,15 +123,22 @@ class TaxTypeRequest extends FormRequest
         if (! $payload->has('transaction_type')) {
             $payload->put(
                 'transaction_type',
-                ($this->isMethod('PUT') || $this->isMethod('PATCH'))
+                $this->isUpdate()
                     ? $this->route('tax_type')->transaction_type
                     : TaxType::TRANSACTION_TYPE_SALES
             );
         }
 
-        if (! $payload->has('compound_tax') && ! ($this->isMethod('PUT') || $this->isMethod('PATCH'))) {
+        if (! $payload->has('compound_tax') && ! $this->isUpdate()) {
             $payload->put('compound_tax', false);
         }
+
+        $payload->put('tax_category_code', $this->effectiveTaxCategoryCode());
+
+        $payload->put(
+            'tax_exemption_reason',
+            $this->requiresTaxExemptionReason() ? $this->effectiveTaxExemptionReason() : null
+        );
 
         return $payload
             ->merge([
@@ -123,7 +154,7 @@ class TaxTypeRequest extends FormRequest
             return $this->boolean('compound_tax');
         }
 
-        return $this->isMethod('PUT') || $this->isMethod('PATCH')
+        return $this->isUpdate()
             ? $this->route('tax_type')->compound_tax
             : false;
     }
@@ -134,16 +165,59 @@ class TaxTypeRequest extends FormRequest
             return $this->input('calculation_type');
         }
 
-        return $this->isMethod('PUT') || $this->isMethod('PATCH')
+        return $this->isUpdate()
             ? $this->route('tax_type')->calculation_type
             : 'percentage';
+    }
+
+    /**
+     * The Tax Category Code the request results in — the submitted one, the
+     * stored one on updates that omit it, or the standard rate on creates.
+     */
+    private function effectiveTaxCategoryCode(): string
+    {
+        if ($this->has('tax_category_code')) {
+            return (string) $this->input('tax_category_code');
+        }
+
+        return $this->isUpdate()
+            ? ($this->route('tax_type')->tax_category_code ?? TaxType::TAX_CATEGORY_CODE_STANDARD)
+            : TaxType::TAX_CATEGORY_CODE_STANDARD;
+    }
+
+    /**
+     * The exemption reason the request results in — the submitted one, or the
+     * stored one on updates that omit it.
+     */
+    private function effectiveTaxExemptionReason(): ?string
+    {
+        if ($this->has('tax_exemption_reason')) {
+            return $this->input('tax_exemption_reason');
+        }
+
+        return $this->isUpdate()
+            ? $this->route('tax_type')->tax_exemption_reason
+            : null;
+    }
+
+    private function requiresTaxExemptionReason(): bool
+    {
+        return in_array($this->effectiveTaxCategoryCode(), TaxType::EXEMPT_TAX_CATEGORY_CODES, true);
     }
 
     private function effectiveTransactionType(): string
     {
         return $this->input('transaction_type')
-            ?? ($this->isMethod('PUT') || $this->isMethod('PATCH')
+            ?? ($this->isUpdate()
                 ? $this->route('tax_type')->transaction_type
                 : TaxType::TRANSACTION_TYPE_SALES);
+    }
+
+    /**
+     * Whether the request updates an existing tax type rather than creating one.
+     */
+    private function isUpdate(): bool
+    {
+        return $this->isMethod('PUT') || $this->isMethod('PATCH');
     }
 }

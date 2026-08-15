@@ -11,8 +11,7 @@ use InvalidArgumentException;
  * The Pdf platform deliberately knows nothing about invoicing: it is handed
  * finished XML and the profile that XML conforms to, and never asks how either
  * was arrived at. Which documents get one — and the Fallback for those that
- * cannot — is the Sales domain's answer, see
- * {@see \App\Domains\Sales\Application\EInvoiceAttachmentResolver}.
+ * cannot — is the Sales domain's answer; see its EInvoiceAttachmentResolver.
  *
  * Only a driver that can build a PDF/A-3 container can honour this. Gotenberg
  * can; dompdf cannot and ignores it (ADR 0002).

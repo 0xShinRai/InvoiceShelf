@@ -32,6 +32,10 @@ _Avoid_: configured, complete
 What happens when an invoice cannot produce valid XML: the ordinary PDF is generated without embedded XML and a warning is shown. An invalid XML is never embedded.
 _Avoid_: degraded mode
 
+**Missing Requirements**:
+What the E-Invoice builder answers with instead of XML: the named inputs an invoice still lacks before it can become an E-Invoice (seller IBAN, buyer country, exemption reason, …). The same list drives the E-Invoice Ready indicator and the Fallback decision.
+_Avoid_: errors, validation messages
+
 **Tax Category Code**:
 The EN 16931 code classifying a tax rate (S = standard, E = exempt, AE = reverse charge, …). Stored per tax type; exempt categories carry an exemption reason text (e.g. § 19 UStG).
 _Avoid_: tax code, VAT type

@@ -22,6 +22,10 @@ class TaxType extends Model
         'id',
     ];
 
+    protected $attributes = [
+        'tax_category_code' => self::TAX_CATEGORY_CODE_STANDARD,
+    ];
+
     protected function casts(): array
     {
         return [
@@ -38,6 +42,54 @@ class TaxType extends Model
     public const TRANSACTION_TYPE_SALES = 'sales';
 
     public const TRANSACTION_TYPE_PURCHASES = 'purchases';
+
+    /**
+     * EN 16931 Tax Category Codes (UNTDID 5305 subset) classifying a tax rate.
+     */
+    public const TAX_CATEGORY_CODE_STANDARD = 'S';
+
+    public const TAX_CATEGORY_CODE_ZERO_RATED = 'Z';
+
+    public const TAX_CATEGORY_CODE_EXEMPT = 'E';
+
+    public const TAX_CATEGORY_CODE_REVERSE_CHARGE = 'AE';
+
+    public const TAX_CATEGORY_CODE_INTRA_COMMUNITY = 'K';
+
+    public const TAX_CATEGORY_CODE_FREE_EXPORT = 'G';
+
+    public const TAX_CATEGORY_CODE_OUTSIDE_SCOPE = 'O';
+
+    public const TAX_CATEGORY_CODE_CANARY_ISLANDS = 'L';
+
+    public const TAX_CATEGORY_CODE_CEUTA_MELILLA = 'M';
+
+    /**
+     * Every Tax Category Code the data model accepts.
+     */
+    public const TAX_CATEGORY_CODES = [
+        self::TAX_CATEGORY_CODE_STANDARD,
+        self::TAX_CATEGORY_CODE_ZERO_RATED,
+        self::TAX_CATEGORY_CODE_EXEMPT,
+        self::TAX_CATEGORY_CODE_REVERSE_CHARGE,
+        self::TAX_CATEGORY_CODE_INTRA_COMMUNITY,
+        self::TAX_CATEGORY_CODE_FREE_EXPORT,
+        self::TAX_CATEGORY_CODE_OUTSIDE_SCOPE,
+        self::TAX_CATEGORY_CODE_CANARY_ISLANDS,
+        self::TAX_CATEGORY_CODE_CEUTA_MELILLA,
+    ];
+
+    /**
+     * Tax Category Codes whose EN 16931 business rules demand an exemption
+     * reason text (BT-120), e.g. § 19 UStG for the exempt category.
+     */
+    public const EXEMPT_TAX_CATEGORY_CODES = [
+        self::TAX_CATEGORY_CODE_EXEMPT,
+        self::TAX_CATEGORY_CODE_REVERSE_CHARGE,
+        self::TAX_CATEGORY_CODE_INTRA_COMMUNITY,
+        self::TAX_CATEGORY_CODE_FREE_EXPORT,
+        self::TAX_CATEGORY_CODE_OUTSIDE_SCOPE,
+    ];
 
     public function taxes(): HasMany
     {

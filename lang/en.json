@@ -187,7 +187,22 @@
     "tax_type": "Tax Type",
     "used_for": "Used for",
     "sales": "Sales",
-    "purchases": "Purchases"
+    "purchases": "Purchases",
+    "tax_category_code": "Tax Category Code",
+    "tax_category_code_description": "EN 16931 category this tax is reported under on e-invoices.",
+    "tax_exemption_reason": "Exemption Reason",
+    "tax_exemption_reason_description": "Why no tax is charged, e.g. § 19 UStG. Required on e-invoices for exempt categories.",
+    "tax_category_codes": {
+      "S": "Standard rate",
+      "Z": "Zero rated goods",
+      "E": "Exempt from tax",
+      "AE": "Reverse charge",
+      "K": "Intra-community supply",
+      "G": "Free export item, tax not charged",
+      "O": "Services outside scope of tax",
+      "L": "Canary Islands general indirect tax",
+      "M": "Tax for production, services and importation in Ceuta and Melilla"
+    }
   },
   "global_search": {
     "search": "Search...",

@@ -7,6 +7,7 @@ import type {
   CreateItemPayload,
   CreateUnitPayload,
 } from '../../../api/services/item.service'
+import { settingService } from '../../../api/services/setting.service'
 import { useNotificationStore } from '../../../stores/notification.store'
 import { handleApiError } from '../../../utils/error-handling'
 import type { Item, Unit } from '../../../types/domain/item'
@@ -27,7 +28,17 @@ export interface ItemForm {
 export interface ItemUnitForm {
   id: number | null
   name: string
+  unit_code: string
 }
+
+/** One curated UN/ECE Rec 20 Unit Code: `key` is a translation key, `value` the code. */
+export interface UnitCodeOption {
+  key: string
+  value: string
+}
+
+/** UN/ECE Rec 20 Unit Code every unit starts out with: C62 = piece. */
+export const DEFAULT_UNIT_CODE = 'C62'
 
 function createItemStub(): ItemForm {
   return {
@@ -48,9 +59,11 @@ export const useItemStore = defineStore('item', () => {
   const selectAllField = ref<boolean>(false)
   const selectedItems = ref<number[]>([])
   const itemUnits = ref<Unit[]>([])
+  const unitCodes = ref<UnitCodeOption[]>([])
   const currentItemUnit = ref<ItemUnitForm>({
     id: null,
     name: '',
+    unit_code: DEFAULT_UNIT_CODE,
   })
   const currentItem = ref<ItemForm>(createItemStub())
 
@@ -220,9 +233,14 @@ export const useItemStore = defineStore('item', () => {
     }
   }
 
-  async function updateItemUnit(data: { id: number; name: string }): Promise<ApiResponse<Unit>> {
+  async function updateItemUnit(
+    data: { id: number } & CreateUnitPayload
+  ): Promise<ApiResponse<Unit>> {
     try {
-      const response = await itemService.updateUnit(data.id, { name: data.name })
+      const response = await itemService.updateUnit(data.id, {
+        name: data.name,
+        unit_code: data.unit_code,
+      })
 
       const pos = itemUnits.value.findIndex(
         (unit) => unit.id === response.data.id
@@ -261,6 +279,7 @@ export const useItemStore = defineStore('item', () => {
       currentItemUnit.value = {
         id: response.data.id,
         name: response.data.name,
+        unit_code: response.data.unit_code || DEFAULT_UNIT_CODE,
       }
       return response
     } catch (err: unknown) {
@@ -293,12 +312,32 @@ export const useItemStore = defineStore('item', () => {
     }
   }
 
+  /**
+   * The curated UN/ECE Rec 20 Unit Codes, fetched once and cached — the list is
+   * static configuration, so re-fetching it per modal open buys nothing.
+   */
+  async function fetchUnitCodes(): Promise<UnitCodeOption[]> {
+    if (unitCodes.value.length) {
+      return unitCodes.value
+    }
+
+    try {
+      const response = await settingService.getConfig({ key: 'unit_codes' })
+      unitCodes.value = (response.unit_codes ?? []) as UnitCodeOption[]
+      return unitCodes.value
+    } catch (err: unknown) {
+      handleApiError(err)
+      throw err
+    }
+  }
+
   return {
     items,
     totalItems,
     selectAllField,
     selectedItems,
     itemUnits,
+    unitCodes,
     currentItemUnit,
     currentItem,
     isEdit,
@@ -317,5 +356,6 @@ export const useItemStore = defineStore('item', () => {
     fetchItemUnits,
     fetchItemUnit,
     deleteItemUnit,
+    fetchUnitCodes,
   }
 })

@@ -9,6 +9,7 @@ use App\Domains\Accounts\Models\Company;
 use App\Domains\Accounts\Models\CompanyInvitation;
 use App\Domains\Accounts\Models\CompanySetting;
 use App\Domains\Money\Models\Currency;
+use App\Domains\Sales\Application\EInvoiceSettings;
 use App\Platform\Http\Controller;
 use App\Platform\Modules\Models\Module;
 use App\Platform\Operations\Http\Concerns\GeneratesMenu;
@@ -27,7 +28,7 @@ class BootstrapController extends Controller
      *
      * @return JsonResponse
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, EInvoiceSettings $einvoice_settings)
     {
         $current_user = $request->user();
         $current_user_settings = $current_user->getAllSettings();
@@ -50,6 +51,8 @@ class BootstrapController extends Controller
             'show_sidebar_group_labels',
         ]);
 
+        $einvoice_context = $einvoice_settings->context();
+
         // Super admin mode — return admin-only menu with all companies listed
         if ($current_user->isSuperAdmin() && $request->has('admin_mode')) {
             return response()->json([
@@ -62,6 +65,7 @@ class BootstrapController extends Controller
                 'current_company_currency' => Currency::first(),
                 'config' => config('invoiceshelf'),
                 'global_settings' => $global_settings,
+                'einvoice' => $einvoice_context,
                 'main_menu' => $this->generateMenu('admin_menu', $current_user),
                 'setting_menu' => [],
                 'modules' => [],
@@ -82,6 +86,7 @@ class BootstrapController extends Controller
                 'current_company_currency' => Currency::first(),
                 'config' => config('invoiceshelf'),
                 'global_settings' => $global_settings,
+                'einvoice' => $einvoice_context,
                 'main_menu' => [],
                 'setting_menu' => [],
                 'modules' => [],
@@ -130,6 +135,7 @@ class BootstrapController extends Controller
             'current_company_currency' => $current_company_currency,
             'config' => config('invoiceshelf'),
             'global_settings' => $global_settings,
+            'einvoice' => $einvoice_context,
             'main_menu' => $main_menu,
             'setting_menu' => $setting_menu,
             'modules' => Module::where('enabled', true)->pluck('name'),

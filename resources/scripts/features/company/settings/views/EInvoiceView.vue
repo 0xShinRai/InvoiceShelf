@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVuelidate } from '@vuelidate/core'
 import { helpers, maxLength } from '@vuelidate/validators'
 import { useCompanyStore } from '@/scripts/stores/company.store'
 import { useGlobalStore } from '@/scripts/stores/global.store'
+import { einvoiceService } from '@/scripts/api/services/einvoice.service'
+import type { EInvoiceReadiness } from '@/scripts/api/services/einvoice.service'
 
 const { t } = useI18n()
 const companyStore = useCompanyStore()
@@ -22,6 +24,24 @@ const requiredPdfDriver = computed<string>(
 )
 
 const isSaving = ref<boolean>(false)
+
+/**
+ * The E-Invoice Ready indicator. The server derives it from the same
+ * missing-requirements check the invoice pipeline uses, so what it lists here
+ * is exactly what would otherwise send every invoice into the Fallback.
+ */
+const readiness = ref<EInvoiceReadiness | null>(null)
+
+async function loadReadiness(): Promise<void> {
+  try {
+    readiness.value = await einvoiceService.companyReadiness()
+  } catch {
+    // Nothing to indicate then — the tab stays usable without the verdict.
+    readiness.value = null
+  }
+}
+
+onMounted(loadReadiness)
 
 const settingsForm = reactive<{
   einvoice_iban: string
@@ -108,6 +128,10 @@ async function submitForm(): Promise<void> {
       },
       message: 'general.setting_updated',
     })
+
+    // The IBAN is master data the indicator judges, so the verdict is re-read
+    // rather than left stale next to the value that just changed it.
+    await loadReadiness()
   } catch {
     // The store already surfaced the failure.
   } finally {
@@ -143,6 +167,13 @@ async function submitForm(): Promise<void> {
         }}
       </span>
     </div>
+
+    <BaseEInvoiceReadiness
+      v-if="readiness"
+      class="mt-6"
+      :ready="readiness.ready"
+      :missing-requirements="readiness.missing_requirements"
+    />
 
     <ul class="mt-6 divide-y divide-line-default">
       <BaseSwitchSection

@@ -200,3 +200,13 @@ Notes on the mechanics:
 ## CI Pipeline
 
 GitHub Actions (`check.yaml`): runs Pint style check, then runs Pest tests in parallel (`php artisan test --parallel`) on PHP 8.4 with Xdebug disabled (`coverage: none`). The test job does **not** build the frontend — the suite is API/JSON only and never renders the Vite blade, so no Node/Vite step is needed (release/docker workflows still build assets in their own jobs).
+
+## Agent skills
+
+### Issue tracker
+
+Issues live on the fork's GitHub Issues (`0xShinRai/InvoiceShelf`), never upstream. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` at the repo root, ADRs in `docs/architecture/`. See `docs/agents/domain.md`.

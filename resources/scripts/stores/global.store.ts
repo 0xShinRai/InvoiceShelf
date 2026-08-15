@@ -2,7 +2,11 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import groupBy from 'lodash/groupBy'
 import { bootstrapService } from '@/scripts/api/services/bootstrap.service'
-import type { MenuItem, BootstrapResponse } from '@/scripts/api/services/bootstrap.service'
+import type {
+  MenuItem,
+  BootstrapResponse,
+  EInvoiceContext,
+} from '@/scripts/api/services/bootstrap.service'
 import { settingService } from '@/scripts/api/services/setting.service'
 import type {
   DateFormat,
@@ -25,6 +29,7 @@ export const useGlobalStore = defineStore('global', () => {
   // State
   const config = ref<Record<string, unknown> | null>(null)
   const globalSettings = ref<Record<string, string> | null>(null)
+  const einvoice = ref<EInvoiceContext | null>(null)
 
   const timeZones = ref<Array<{ key: string; value: string }>>([])
   const dateFormats = ref<DateFormat[]>([])
@@ -67,6 +72,7 @@ export const useGlobalStore = defineStore('global', () => {
       userMenu.value = response.user_menu ?? []
       config.value = response.config
       globalSettings.value = response.global_settings
+      einvoice.value = response.einvoice ?? null
 
       // user store
       userStore.currentUser = response.current_user
@@ -287,6 +293,7 @@ export const useGlobalStore = defineStore('global', () => {
     // State
     config,
     globalSettings,
+    einvoice,
     timeZones,
     dateFormats,
     timeFormats,

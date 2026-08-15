@@ -224,7 +224,12 @@ class EInvoiceBuilder
         $this->requireValue($missing, EInvoiceRequirement::SellerCity, $address?->city);
         $this->requireValue($missing, EInvoiceRequirement::SellerCountry, $address?->country?->code);
 
-        if (blank($company?->vat_id) && blank($company?->tax_id)) {
+        // BR-CO-26 accepts only BT-29, BT-30 or BT-31 as the seller's
+        // identification, and of those the mapping writes just the VAT
+        // identifier (BT-31). A national tax number becomes BT-32, which the
+        // rule does not count — so a tax number alone must read as not ready,
+        // or the XML passes the XSD here and fails Schematron at the buyer.
+        if (blank($company?->vat_id)) {
             $this->add($missing, EInvoiceRequirement::SellerTaxRegistration);
         }
 
@@ -336,6 +341,14 @@ class EInvoiceBuilder
             Carbon::parse($invoice->invoice_date),
             strtoupper((string) $invoice->currency->code),
         );
+
+        // The invoice model carries no delivery date of its own, but the
+        // delivery block must not stay empty: Peppol rejects empty elements
+        // (PEPPOL-EN16931-R008) and German UStG §14 expects a Leistungsdatum.
+        // Until the model can state one, the invoice date is the delivery
+        // date (BT-72) — the reading recipients apply to an invoice that
+        // names no other.
+        $document->setDocumentSupplyChainEvent(Carbon::parse($invoice->invoice_date));
 
         if (filled($invoice->reference_number)) {
             $document->setDocumentBuyerReference((string) $invoice->reference_number);

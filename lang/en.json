@@ -1011,7 +1011,7 @@
       "seller_postcode": "Company post code",
       "seller_city": "Company city",
       "seller_country": "Company country",
-      "seller_tax_registration": "Company VAT ID or tax number",
+      "seller_tax_registration": "Company VAT ID",
       "seller_iban": "IBAN in the E-Invoice settings",
       "buyer_name": "Customer name",
       "buyer_country": "Customer billing country",

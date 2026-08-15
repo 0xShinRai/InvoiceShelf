@@ -39,7 +39,10 @@ enum EInvoiceRequirement: string
     /** BT-40 — the seller's country code. */
     case SellerCountry = 'seller_country';
 
-    /** BT-31/BT-32 — the seller's VAT identifier or tax number. */
+    /**
+     * BT-31 — the seller's VAT identifier. A national tax number alone is
+     * only BT-32, which BR-CO-26 does not accept as identification.
+     */
     case SellerTaxRegistration = 'seller_tax_registration';
 
     /** BT-84 — the IBAN the payment is to be made to, from the E-Invoice settings. */

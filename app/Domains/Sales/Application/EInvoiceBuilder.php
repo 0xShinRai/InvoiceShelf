@@ -2,6 +2,7 @@
 
 namespace App\Domains\Sales\Application;
 
+use App\Domains\Accounts\Models\Company;
 use App\Domains\Accounts\Models\CompanySetting;
 use App\Domains\Catalog\Models\Unit;
 use App\Domains\Contacts\Models\Address;
@@ -101,6 +102,28 @@ class EInvoiceBuilder
     }
 
     /**
+     * The requirements a company's own master data does not meet yet — what the
+     * E-Invoice Ready indicator reports.
+     *
+     * These are the seller-side subset of {@see self::missingRequirements()}:
+     * the gaps that hold for every invoice the company will ever issue, and the
+     * only ones it can close in its own settings. An empty list therefore means
+     * ready, not that any particular invoice will pass.
+     *
+     * @return list<EInvoiceRequirement>
+     */
+    public function missingCompanyRequirements(Company $company): array
+    {
+        $company->loadMissing('address.country');
+
+        $missing = [];
+
+        $this->collectSellerRequirements($missing, $company);
+
+        return $missing;
+    }
+
+    /**
      * Whether a string is XML a parser accepts.
      */
     private function isWellFormed(string $xml): bool
@@ -126,8 +149,6 @@ class EInvoiceBuilder
     {
         $missing = [];
 
-        $company = $invoice->company;
-        $companyAddress = $company?->address;
         $customer = $invoice->customer;
         $billingAddress = $customer?->billingAddress;
 
@@ -135,19 +156,7 @@ class EInvoiceBuilder
         $this->requireValue($missing, EInvoiceRequirement::InvoiceDate, $invoice->invoice_date);
         $this->requireValue($missing, EInvoiceRequirement::InvoiceCurrency, $invoice->currency?->code);
 
-        $this->requireValue($missing, EInvoiceRequirement::SellerName, $company?->name);
-        $this->requireValue($missing, EInvoiceRequirement::SellerStreet, $companyAddress?->address_street_1);
-        $this->requireValue($missing, EInvoiceRequirement::SellerPostcode, $companyAddress?->zip);
-        $this->requireValue($missing, EInvoiceRequirement::SellerCity, $companyAddress?->city);
-        $this->requireValue($missing, EInvoiceRequirement::SellerCountry, $companyAddress?->country?->code);
-
-        if (blank($company?->vat_id) && blank($company?->tax_id)) {
-            $this->add($missing, EInvoiceRequirement::SellerTaxRegistration);
-        }
-
-        if ($this->sellerIban($invoice) === null) {
-            $this->add($missing, EInvoiceRequirement::SellerIban);
-        }
+        $this->collectSellerRequirements($missing, $invoice->company);
 
         $this->requireValue($missing, EInvoiceRequirement::BuyerName, $customer?->name);
         $this->requireValue($missing, EInvoiceRequirement::BuyerCountry, $billingAddress?->country?->code);
@@ -196,6 +205,32 @@ class EInvoiceBuilder
         }
 
         return $missing;
+    }
+
+    /**
+     * Record every requirement the seller's own master data does not meet: its
+     * name, postal address, tax registration and the IBAN from the E-Invoice
+     * settings.
+     *
+     * @param  list<EInvoiceRequirement>  $missing
+     */
+    private function collectSellerRequirements(array &$missing, ?Company $company): void
+    {
+        $address = $company?->address;
+
+        $this->requireValue($missing, EInvoiceRequirement::SellerName, $company?->name);
+        $this->requireValue($missing, EInvoiceRequirement::SellerStreet, $address?->address_street_1);
+        $this->requireValue($missing, EInvoiceRequirement::SellerPostcode, $address?->zip);
+        $this->requireValue($missing, EInvoiceRequirement::SellerCity, $address?->city);
+        $this->requireValue($missing, EInvoiceRequirement::SellerCountry, $address?->country?->code);
+
+        if (blank($company?->vat_id) && blank($company?->tax_id)) {
+            $this->add($missing, EInvoiceRequirement::SellerTaxRegistration);
+        }
+
+        if ($this->sellerIban($company?->id) === null) {
+            $this->add($missing, EInvoiceRequirement::SellerIban);
+        }
     }
 
     /**
@@ -376,10 +411,10 @@ class EInvoiceBuilder
     private function writePaymentDetails(ZugferdDocumentBuilder $document, Invoice $invoice): void
     {
         $document->addDocumentPaymentMeanToCreditTransfer(
-            (string) $this->sellerIban($invoice),
+            (string) $this->sellerIban($invoice->company_id),
             $invoice->company->name,
             null,
-            $this->sellerBic($invoice),
+            $this->sellerBic($invoice->company_id),
         );
 
         if (filled($invoice->due_date)) {
@@ -626,9 +661,13 @@ class EInvoiceBuilder
      * The seller IBAN from the E-Invoice settings, or null when it is missing
      * or not an IBAN at all.
      */
-    private function sellerIban(Invoice $invoice): ?string
+    private function sellerIban(mixed $companyId): ?string
     {
-        $iban = $this->bankIdentifier(CompanySetting::getSetting(EInvoiceSettings::IBAN, $invoice->company_id));
+        if ($companyId === null) {
+            return null;
+        }
+
+        $iban = $this->bankIdentifier(CompanySetting::getSetting(EInvoiceSettings::IBAN, $companyId));
 
         return $iban !== null && preg_match(self::IBAN_PATTERN, $iban) === 1 ? $iban : null;
     }
@@ -636,9 +675,9 @@ class EInvoiceBuilder
     /**
      * The seller BIC from the E-Invoice settings — optional under EN 16931.
      */
-    private function sellerBic(Invoice $invoice): ?string
+    private function sellerBic(mixed $companyId): ?string
     {
-        return $this->bankIdentifier(CompanySetting::getSetting(EInvoiceSettings::BIC, $invoice->company_id));
+        return $this->bankIdentifier(CompanySetting::getSetting(EInvoiceSettings::BIC, $companyId));
     }
 
     /**

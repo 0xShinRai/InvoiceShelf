@@ -48,14 +48,7 @@ final class MustangReport
      */
     public static function fromOutput(string $output): self
     {
-        $previous = libxml_use_internal_errors(true);
-        $report = simplexml_load_string(trim($output));
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
-
-        if ($report === false || $report->getName() !== 'validation') {
-            throw new RuntimeException("Mustang did not return a validation report:\n".trim($output));
-        }
+        $report = ValidatorOutput::parse($output, 'validation', 'Mustang');
 
         return new self(
             (string) ($report->summary['status'] ?? '') === 'valid',

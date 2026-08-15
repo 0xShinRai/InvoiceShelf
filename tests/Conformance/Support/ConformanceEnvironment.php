@@ -16,6 +16,11 @@ use Symfony\Component\Process\Process;
  * asked for by name (`--group=conformance`), so a conformance run that quietly
  * validated nothing would be worse than one that fails.
  *
+ * They are read straight from the environment rather than through `config()`,
+ * because they describe the machine the job runs on and nothing else: they are
+ * meaningless to the application, and giving them config keys would put CI
+ * tooling into the configuration every installation ships.
+ *
  * Provisioning lives in `.github/workflows/einvoice-conformance.yaml`; the same
  * variables let the job be reproduced locally.
  */

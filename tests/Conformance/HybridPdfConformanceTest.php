@@ -46,7 +46,8 @@ use Tests\Conformance\Support\ConformanceEnvironment;
  * Generation is a round trip to Gotenberg, and all three assertions below are
  * about the same document, so it is produced once and kept on disk — where the
  * CI job also picks it up as an artifact, so a failed conformance run can be
- * opened in a validator by hand.
+ * opened in a validator by hand. The invoice is therefore read on the first
+ * call only; the later tests judge the file that call wrote.
  */
 function conformanceHybridPdf(Invoice $invoice): string
 {

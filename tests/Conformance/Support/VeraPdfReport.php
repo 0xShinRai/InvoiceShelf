@@ -56,14 +56,7 @@ final class VeraPdfReport
      */
     public static function fromOutput(string $output): self
     {
-        $previous = libxml_use_internal_errors(true);
-        $report = simplexml_load_string(trim($output));
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
-
-        if ($report === false || $report->getName() !== 'report') {
-            throw new RuntimeException("veraPDF did not return a validation report:\n".trim($output));
-        }
+        $report = ValidatorOutput::parse($output, 'report', 'veraPDF');
 
         $summary = $report->batchSummary->validationReports ?? null;
 

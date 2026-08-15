@@ -77,6 +77,13 @@ Mailpit receives development email over SMTP at `mail:1025`. Adminer connects
 to MySQL or PostgreSQL at host `db`; its database, username, and password are
 all `invoiceshelf`.
 
+## Gotenberg version
+
+The Gotenberg-enabled Compose files pin `gotenberg/gotenberg:8.36` instead of
+the floating `:8` tag. ZUGFeRD e-invoicing needs the `facturxXml` field that
+Gotenberg added in 8.34.0, so the dev stack must not silently run an older 8.x
+image. Keep the pin at 8.34 or newer when bumping it.
+
 ## Advanced Compose usage
 
 The six Compose definitions in this directory cover all three databases, with

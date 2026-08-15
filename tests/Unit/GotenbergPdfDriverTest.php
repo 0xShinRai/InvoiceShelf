@@ -1,5 +1,6 @@
 <?php
 
+use App\Platform\Pdf\Rendering\FacturXAttachment;
 use App\Platform\Pdf\Rendering\GotenbergPdfDriver;
 
 /**
@@ -16,9 +17,26 @@ beforeEach(function () {
 
 // A real view that renders without any shared document data, so these stay
 // unit tests rather than needing a seeded invoice.
-function gotenbergRequestBody(string $template = 'app.pdf.partials.fonts'): string
+function gotenbergRequestBody(
+    string $template = 'app.pdf.partials.fonts',
+    ?FacturXAttachment $eInvoice = null,
+): string {
+    return (string) (new GotenbergPdfDriver)
+        ->buildRequest($template, [], null, $eInvoice)
+        ->getBody();
+}
+
+/**
+ * Stand-in for what the E-Invoice builder hands over. The builder's own tests
+ * cover the mapping; here only the transport matters, so the payload is kept
+ * short enough to be recognised in the multipart body.
+ */
+function facturXTestAttachment(): FacturXAttachment
 {
-    return (string) (new GotenbergPdfDriver)->buildRequest($template)->getBody();
+    return FacturXAttachment::en16931(
+        '<?xml version="1.0" encoding="UTF-8"?><rsm:CrossIndustryInvoice '
+        .'xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"/>'
+    );
 }
 
 /**
@@ -64,4 +82,66 @@ test('it throws when the configured host targets a private network address', fun
 
     expect(fn () => gotenbergRequestBody())
         ->toThrow(InvalidArgumentException::class, 'Invalid Gotenberg host');
+});
+
+/**
+ * The Hybrid PDF half: an e-invoice attachment has to reach Gotenberg as the
+ * `facturxXml` file named factur-x.xml, declared as Profile EN 16931, inside a
+ * PDF/A-3b container. Anything less and the produced PDF is not a ZUGFeRD
+ * e-invoice, however valid the XML itself is.
+ */
+test('an e-invoice attachment travels with the request as the factur-x xml file', function () {
+    $body = gotenbergRequestBody('app.pdf.partials.fonts', facturXTestAttachment());
+
+    expect($body)
+        ->toContain('name="facturxXml"')
+        ->toContain('filename="factur-x.xml"')
+        ->toContain('CrossIndustryInvoice')
+        ->toContain('name="facturxConformanceLevel"')
+        ->toContain('EN 16931')
+        ->toContain('name="facturxDocumentType"')
+        ->toContain('INVOICE');
+});
+
+test('an embedded e-invoice is built into a PDF/A-3b container', function () {
+    config(['pdf.connections.gotenberg.pdfa' => null]);
+
+    $body = gotenbergRequestBody('app.pdf.partials.fonts', facturXTestAttachment());
+
+    expect($body)->toContain('name="pdfa"')->toContain('PDF/A-3b');
+});
+
+/**
+ * A file may only be embedded from PDF/A-3 onwards, so the instance-wide
+ * setting cannot be allowed to decide the conformance of a Hybrid PDF — and it
+ * has to be replaced rather than added to, since the SDK appends form fields
+ * and Gotenberg would receive two conflicting `pdfa` values.
+ */
+test('the e-invoice conformance replaces the configured pdf/a format', function () {
+    config(['pdf.connections.gotenberg.pdfa' => 'PDF/A-1a']);
+
+    $body = gotenbergRequestBody('app.pdf.partials.fonts', facturXTestAttachment());
+
+    expect($body)->toContain('PDF/A-3b')
+        ->and($body)->not->toContain('PDF/A-1a')
+        ->and(substr_count($body, 'name="pdfa"'))->toBe(1);
+});
+
+test('the configured pdf/a format still applies to an ordinary pdf', function () {
+    config(['pdf.connections.gotenberg.pdfa' => 'PDF/A-1a']);
+
+    expect(gotenbergRequestBody())->toContain('name="pdfa"')->toContain('PDF/A-1a');
+});
+
+/**
+ * The Fallback, seen from the transport: no attachment means the request is
+ * exactly the one an ordinary PDF has always produced.
+ */
+test('a request without an e-invoice carries no factur-x fields at all', function () {
+    expect(gotenbergRequestBody())->not->toContain('facturx');
+});
+
+test('an attachment cannot be built from empty xml', function () {
+    expect(fn () => FacturXAttachment::en16931('   '))
+        ->toThrow(InvalidArgumentException::class, 'cannot carry empty XML');
 });

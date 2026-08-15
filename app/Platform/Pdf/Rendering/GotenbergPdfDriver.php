@@ -5,6 +5,7 @@ namespace App\Platform\Pdf\Rendering;
 use App\Platform\Pdf\Application\FontService;
 use App\Support\Net\BlockedUrlException;
 use App\Support\Net\PrivateNetworkGuard;
+use Gotenberg\FacturX;
 use Gotenberg\Gotenberg;
 use Gotenberg\Stream;
 use Illuminate\Support\Facades\View;
@@ -12,9 +13,15 @@ use Psr\Http\Message\RequestInterface;
 
 class GotenbergPdfDriver implements PdfDriver
 {
-    public function loadView(string $template, array $metadata = [], ?PdfPageSetup $page = null): ResponseStream
-    {
-        return new GotenbergPdfResponse(Gotenberg::send($this->buildRequest($template, $metadata, $page)));
+    public function loadView(
+        string $template,
+        array $metadata = [],
+        ?PdfPageSetup $page = null,
+        ?FacturXAttachment $eInvoice = null,
+    ): ResponseStream {
+        return new GotenbergPdfResponse(
+            Gotenberg::send($this->buildRequest($template, $metadata, $page, $eInvoice))
+        );
     }
 
     /**
@@ -24,8 +31,12 @@ class GotenbergPdfDriver implements PdfDriver
      * below this line used to be inlined into loadView(), which meant the only
      * way to check that an option was set was to run a Gotenberg service.
      */
-    public function buildRequest(string $template, array $metadata = [], ?PdfPageSetup $page = null): RequestInterface
-    {
+    public function buildRequest(
+        string $template,
+        array $metadata = [],
+        ?PdfPageSetup $page = null,
+        ?FacturXAttachment $eInvoice = null,
+    ): RequestInterface {
         $page ??= PdfPageSetup::fromConfig();
         [$width, $height] = $page->gotenbergPaper();
         [$marginTop, $marginBottom, $marginLeft, $marginRight] = $page->gotenbergMargins();
@@ -72,7 +83,20 @@ class GotenbergPdfDriver implements PdfDriver
         // passed through unvalidated by the SDK, so an unsupported one surfaces
         // as an HTTP error from the service; the setting is a fixed list for
         // that reason.
-        if ($pdfa = config('pdf.connections.gotenberg.pdfa')) {
+        //
+        // An embedded e-invoice dictates the conformance rather than inheriting
+        // it: a file may only be attached from PDF/A-3 onwards, so a Hybrid PDF
+        // built to whatever the instance happens to have configured would not be
+        // a valid one. Set in one branch or the other, never both — the SDK
+        // appends form fields, so calling pdfa() twice would send two values.
+        if ($eInvoice !== null) {
+            $chromium
+                ->pdfa(FacturXAttachment::PDFA_CONFORMANCE)
+                ->facturX(new FacturX(
+                    Stream::string(FacturXAttachment::FILENAME, $eInvoice->xml),
+                    $eInvoice->profile,
+                ));
+        } elseif ($pdfa = config('pdf.connections.gotenberg.pdfa')) {
             $chromium->pdfa($pdfa);
         }
 

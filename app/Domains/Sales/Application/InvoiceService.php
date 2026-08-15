@@ -32,6 +32,7 @@ class InvoiceService implements InvoicePdfDataProvider
         private readonly CustomFieldValueWriter $customFieldValueWriter,
         private readonly DocumentExchangeRateRecorder $exchangeRateRecorder,
         private readonly InvoiceEmailSender $invoiceEmailSender,
+        private readonly EInvoiceAttachmentResolver $eInvoiceAttachments,
     ) {}
 
     /**
@@ -317,11 +318,20 @@ class InvoiceService implements InvoicePdfDataProvider
             return view($templatePath);
         }
 
-        return Pdf::loadView($templatePath, PdfMetadata::forDocument(
-            __($invoice->isCreditNote() ? 'pdf_credit_note_label' : 'pdf_invoice_label'),
-            $invoice->invoice_number,
-            $company,
-        ));
+        // Every delivery path — download/stream, email attachment and the
+        // customer portal — reaches the PDF pipeline through this method, so
+        // resolving the e-invoice here is what makes all of them produce the
+        // same document. Null is the Fallback: the ordinary PDF.
+        return Pdf::loadView(
+            $templatePath,
+            PdfMetadata::forDocument(
+                __($invoice->isCreditNote() ? 'pdf_credit_note_label' : 'pdf_invoice_label'),
+                $invoice->invoice_number,
+                $company,
+            ),
+            null,
+            $this->eInvoiceAttachments->resolve($invoice),
+        );
     }
 
     public function clone(Invoice $invoice): Invoice

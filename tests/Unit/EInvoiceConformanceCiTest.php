@@ -135,6 +135,17 @@ test('no other job runs the suite in a way that pulls the conformance group in',
                 || str_contains($command, '--exclude-group=conformance');
 
             expect($safe)->toBeTrue("{$file} runs `{$command}`, which would run the conformance tests without a Gotenberg service");
+
+            // A --parallel run does not honour the group exclusion for the
+            // separate Conformance testsuite — its tests reached a CI run that
+            // spelled out --exclude-group=conformance (reproduced locally). So
+            // every parallel invocation has to select its testsuites explicitly
+            // and leave Conformance unnamed.
+            if (str_contains($command, '--parallel')) {
+                expect(str_contains($command, '--testsuite='))
+                    ->toBeTrue("{$file} runs `{$command}` in parallel without pinning --testsuite, which lets the conformance tests in")
+                    ->and($command)->not->toContain('Conformance');
+            }
         }
 
         foreach ($workflow['jobs'] ?? [] as $name => $job) {

@@ -205,7 +205,7 @@ GitHub Actions (`check.yaml`): runs Pint style check, then runs Pest tests in pa
 
 `einvoice-conformance.yaml` is the independent proof that the Hybrid PDFs the app produces really are ZUGFeRD e-invoices. It is the only job with a service container: a real Gotenberg renders a Hybrid PDF from seeded data end-to-end, then **Mustang CLI** validates the embedded XML (EN 16931 XSD + Schematron), the container and the Factur-X XMP, and **veraPDF** confirms PDF/A-3b independently. The finished PDF is uploaded as a job artifact, so a failing run can be opened in a validator by hand.
 
-Those tests live in `tests/Conformance/` and carry the `conformance` group, which `phpunit.xml` excludes — `php artisan test` and `make test` stay service-free. **`--exclude-group` on the command line replaces the exclusions from `phpunit.xml` rather than adding to them**, which is why the standard jobs spell out `--exclude-group=conformance`; `tests/Unit/EInvoiceConformanceCiTest.php` guards that (and the rest of the job's wiring) so it cannot drift back.
+Those tests live in `tests/Conformance/` and carry the `conformance` group, which `phpunit.xml` excludes — `php artisan test` and `make test` stay service-free. **`--exclude-group` on the command line replaces the exclusions from `phpunit.xml` rather than adding to them**, which is why the standard jobs spell out `--exclude-group=conformance`. A `--parallel` run additionally ignores that exclusion for the separate Conformance testsuite, so the parallel CI steps also pin `--testsuite=Unit,Feature`; `tests/Unit/EInvoiceConformanceCiTest.php` guards all of that (and the rest of the job's wiring) so it cannot drift back.
 
 To reproduce the job locally, provide the same three things it does:
 

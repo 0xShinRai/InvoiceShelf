@@ -134,6 +134,50 @@ test('the configured pdf/a format still applies to an ordinary pdf', function ()
 });
 
 /**
+ * Gotenberg writes document properties with exiftool, which stores a bare
+ * Author key in XMP as pdf:Author — a property no PDF/A-recognised schema
+ * defines, so veraPDF fails the whole container on ISO 19005-3 clause
+ * 6.6.2.3.1 (caught by the CI conformance job). In an archival file the
+ * authoring entity belongs in dc:creator, which is where exiftool maps the
+ * bare Creator key.
+ */
+test('a hybrid pdf carries its author as the archival creator property', function () {
+    $body = (string) (new GotenbergPdfDriver)
+        ->buildRequest('app.pdf.partials.fonts', [
+            'Title' => 'Invoice INV-1',
+            'Author' => 'Acme Inc',
+            'Creator' => 'InvoiceShelf',
+        ], null, facturXTestAttachment())
+        ->getBody();
+
+    expect($body)
+        ->toContain('"Creator":"Acme Inc"')
+        ->not->toContain('Author');
+});
+
+test('the configured pdf/a format sanitises the author the same way', function () {
+    config(['pdf.connections.gotenberg.pdfa' => 'PDF/A-3b']);
+
+    $body = (string) (new GotenbergPdfDriver)
+        ->buildRequest('app.pdf.partials.fonts', ['Author' => 'Acme Inc'])
+        ->getBody();
+
+    expect($body)
+        ->toContain('"Creator":"Acme Inc"')
+        ->not->toContain('Author');
+});
+
+test('an ordinary pdf keeps its author property', function () {
+    config(['pdf.connections.gotenberg.pdfa' => null]);
+
+    $body = (string) (new GotenbergPdfDriver)
+        ->buildRequest('app.pdf.partials.fonts', ['Author' => 'Acme Inc'])
+        ->getBody();
+
+    expect($body)->toContain('"Author":"Acme Inc"');
+});
+
+/**
  * The Fallback, seen from the transport: no attachment means the request is
  * exactly the one an ordinary PDF has always produced.
  */

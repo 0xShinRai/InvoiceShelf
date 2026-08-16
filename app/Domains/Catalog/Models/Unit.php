@@ -13,11 +13,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Unit extends Model
 {
+    /**
+     * UN/ECE Rec 20 code used when no Unit Code is given: C62 = piece.
+     */
+    public const DEFAULT_UNIT_CODE = 'C62';
+
     protected $table = 'units';
 
     use HasFactory;
 
-    protected $fillable = ['name', 'company_id'];
+    protected $fillable = ['name', 'unit_code', 'company_id'];
+
+    protected $attributes = [
+        'unit_code' => self::DEFAULT_UNIT_CODE,
+    ];
 
     public function items(): HasMany
     {

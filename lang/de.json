@@ -166,7 +166,22 @@
     "compound_tax": "zusammengesetzte Steuer",
     "percentage": "Prozentsatz",
     "fixed_amount": "Festbetrag",
-    "tax_type": "Steuerart"
+    "tax_type": "Steuerart",
+    "tax_category_code": "Steuerkategorie-Code",
+    "tax_category_code_description": "EN-16931-Kategorie, unter der diese Steuer auf E-Rechnungen ausgewiesen wird.",
+    "tax_exemption_reason": "Befreiungsgrund",
+    "tax_exemption_reason_description": "Warum keine Steuer berechnet wird, z. B. § 19 UStG. Auf E-Rechnungen für befreite Kategorien erforderlich.",
+    "tax_category_codes": {
+      "S": "Normalsatz",
+      "Z": "Nullsatz",
+      "E": "Steuerbefreit",
+      "AE": "Umkehrung der Steuerschuldnerschaft (Reverse Charge)",
+      "K": "Innergemeinschaftliche Lieferung",
+      "G": "Steuerfreie Ausfuhrlieferung",
+      "O": "Nicht steuerbare Leistungen",
+      "L": "Allgemeine indirekte Steuer der Kanarischen Inseln",
+      "M": "Steuer für Produktion, Dienstleistungen und Einfuhr in Ceuta und Melilla"
+    }
   },
   "global_search": {
     "search": "Suchen...",
@@ -866,6 +881,37 @@
       "date_range": "Datumsbereich auswählen"
     }
   },
+  "e_invoice": {
+    "ready": "Bereit für E-Rechnungen",
+    "ready_desc": "Ihre Unternehmensstammdaten sind vollständig. Rechnungen werden als ZUGFeRD-E-Rechnungen ausgestellt.",
+    "not_ready": "Nicht bereit für E-Rechnungen",
+    "not_ready_desc": "Vervollständigen Sie Folgendes, bevor Ihre Rechnungen zu E-Rechnungen werden können:",
+    "fallback_title": "Diese Rechnung wird nicht als E-Rechnung ausgestellt",
+    "fallback_desc": "Ihr PDF wird ohne eingebettetes E-Rechnungs-XML erzeugt, weil Folgendes fehlt:",
+    "requirements": {
+      "invoice_number": "Rechnungsnummer",
+      "invoice_date": "Rechnungsdatum",
+      "invoice_currency": "Rechnungswährung",
+      "seller_name": "Unternehmensname",
+      "seller_street": "Straße des Unternehmens",
+      "seller_postcode": "Postleitzahl des Unternehmens",
+      "seller_city": "Ort des Unternehmens",
+      "seller_country": "Land des Unternehmens",
+      "seller_tax_registration": "USt-IdNr. des Unternehmens",
+      "seller_iban": "IBAN in den E-Rechnungs-Einstellungen",
+      "buyer_name": "Kundenname",
+      "buyer_country": "Land der Rechnungsadresse des Kunden",
+      "line_items": "Mindestens eine Rechnungsposition",
+      "line_item_name": "Ein Name für jede Rechnungsposition",
+      "net_prices": "Nettopreise, da Brutto-Rechnungen keine E-Rechnungen werden können",
+      "tax_category_code": "Eine Steuerart mit Steuerkategorie-Code für jede Steuer",
+      "tax_rate_percentage": "Ein prozentualer Steuersatz, da Festbetragssteuern keine E-Rechnungen werden können",
+      "invoice_tax": "Eine Steuer auf jeder Rechnungsposition",
+      "single_tax_rate_per_line": "Eine einzige Steuer je Rechnungsposition",
+      "tax_exemption_reason": "Ein Befreiungsgrund an der steuerbefreiten Steuerart",
+      "valid_cii_xml": "Aus dieser Rechnung konnte kein gültiges E-Rechnungs-XML erzeugt werden"
+    }
+  },
   "settings": {
     "menu_title": {
       "account_settings": "Konto-Einstellungen",
@@ -883,7 +929,23 @@
       "notes": "Notizen",
       "exchange_rate": "Wechselkurs",
       "address_information": "Adressinformationen",
-      "pdf_generation": "PDF-Erzeugung"
+      "pdf_generation": "PDF-Erzeugung",
+      "e_invoice": "E-Rechnung"
+    },
+    "e_invoice": {
+      "title": "E-Rechnung",
+      "description": "Stellen Sie Ihre Rechnungen als ZUGFeRD-E-Rechnungen aus und hinterlegen Sie die Bankverbindung, die sie enthalten müssen.",
+      "enable": "E-Rechnungen aktivieren",
+      "enable_desc": "Jedes Rechnungs-PDF dieses Unternehmens wird ein Hybrid-PDF mit eingebettetem EN-16931-XML.",
+      "requires_pdf_driver": "E-Rechnungen erfordern den PDF-Treiber {driver}. Wechseln Sie den instanzweiten PDF-Treiber unter Admin > PDF-Erzeugung, um diese Einstellungen zu aktivieren.",
+      "bank_details": "Bankverbindung",
+      "bank_details_desc": "Die Zahlungsangaben, die EN 16931 im E-Rechnungs-XML erwartet.",
+      "iban": "IBAN",
+      "bic": "BIC",
+      "bank_name": "Name der Bank",
+      "iban_invalid": "Geben Sie eine gültige IBAN ein (z. B. DE02120300000000202051).",
+      "bic_invalid": "Geben Sie einen gültigen BIC ein (8 oder 11 Zeichen, z. B. BYLADEM1001).",
+      "bank_name_max_length": "Der Name der Bank darf höchstens 255 Zeichen lang sein."
     },
     "address_information": {
       "section_description": "  Sie können Ihre Adressinformationen über das untenstehende Formular aktualisieren."
@@ -1123,6 +1185,39 @@
         "add_item_unit": "Artikeleinheit hinzufügen",
         "edit_item_unit": "Elementeinheit bearbeiten",
         "unit_name": "Einheitname",
+        "unit_code": "Einheiten-Code",
+        "unit_code_help": "UN/ECE-Rec-20-Code, der für diese Einheit auf E-Rechnungen verwendet wird.",
+        "unit_codes": {
+          "piece": "Stück",
+          "hour": "Stunde",
+          "day": "Tag",
+          "week": "Woche",
+          "month": "Monat",
+          "year": "Jahr",
+          "minute": "Minute",
+          "second": "Sekunde",
+          "kilogram": "Kilogramm",
+          "gram": "Gramm",
+          "milligram": "Milligramm",
+          "tonne": "Tonne",
+          "pound": "Pfund",
+          "ounce": "Unze",
+          "litre": "Liter",
+          "millilitre": "Milliliter",
+          "metre": "Meter",
+          "centimetre": "Zentimeter",
+          "millimetre": "Millimeter",
+          "kilometre": "Kilometer",
+          "square_metre": "Quadratmeter",
+          "cubic_metre": "Kubikmeter",
+          "inch": "Zoll",
+          "foot": "Fuß",
+          "box": "Karton",
+          "package": "Paket",
+          "set": "Set",
+          "dozen": "Dutzend",
+          "kilowatt_hour": "Kilowattstunde"
+        },
         "item_unit_added": "Artikeleinheit hinzugefügt",
         "item_unit_updated": "Artikeleinheit aktualisiert",
         "item_unit_confirm_delete": "Du kannst diese Artikeleinheit nicht wiederherstellen",

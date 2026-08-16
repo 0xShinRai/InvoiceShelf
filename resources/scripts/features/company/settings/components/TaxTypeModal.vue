@@ -68,7 +68,7 @@ const defaultCurrency = computed(() => companyStore.selectedCompanyCurrency)
 const taxCategoryCodeOptions = computed(() =>
   TAX_CATEGORY_CODES.map((code) => ({
     id: code,
-    label: `${code} — ${t(`tax_types.tax_category_codes.${code}`)}`,
+    label: `${t(`tax_types.tax_category_codes.${code}`)} (${code})`,
   }))
 )
 

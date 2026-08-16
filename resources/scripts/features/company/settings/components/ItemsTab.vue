@@ -54,7 +54,8 @@ const columns = computed<TableColumn[]>(() => [
   {
     key: 'unit_code',
     label: t('settings.customization.items.unit_code'),
-    tdClass: 'text-body',
+    thClass: 'extra',
+    tdClass: 'font-medium text-muted',
     sortable: false,
   },
   {

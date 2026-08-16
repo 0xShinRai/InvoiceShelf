@@ -22,10 +22,6 @@ class TaxType extends Model
         'id',
     ];
 
-    protected $attributes = [
-        'tax_category_code' => self::TAX_CATEGORY_CODE_STANDARD,
-    ];
-
     protected function casts(): array
     {
         return [

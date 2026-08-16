@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/next-number', [SerialNumberController::class, 'nextNumber']);
 Route::get('/number-placeholders', [SerialNumberController::class, 'placeholders']);
 
-Route::get('/einvoice/readiness', [EInvoiceReadinessController::class, 'company']);
+Route::get('/e-invoice/readiness', [EInvoiceReadinessController::class, 'company']);
 
-Route::get('/invoices/{invoice}/einvoice-readiness', [EInvoiceReadinessController::class, 'invoice']);
+Route::get('/invoices/{invoice}/e-invoice-readiness', [EInvoiceReadinessController::class, 'invoice']);
 Route::get('/invoices/{invoice}/send/preview', [InvoicesController::class, 'sendPreview']);
 Route::post('/invoices/{invoice}/send', [InvoicesController::class, 'send']);
 Route::post('/invoices/{invoice}/clone', [InvoicesController::class, 'clone']);

@@ -266,6 +266,15 @@ test('the document metadata names the invoice, its type, date and currency', fun
         ->and(ciiValue($xml, CII_AGREEMENT.'/ram:BuyerReference'))->toBe('PO-4711');
 });
 
+test('the invoice date doubles as the delivery date (BT-72)', function () {
+    $xml = $this->builder->build($this->invoice)->xml();
+
+    expect(ciiValue(
+        $xml,
+        '/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ActualDeliverySupplyChainEvent/ram:OccurrenceDateTime/udt:DateTimeString'
+    ))->toBe('20260201');
+});
+
 test('a credit note is typed as one rather than as an invoice', function () {
     $this->invoice->update(['type' => Invoice::TYPE_CREDIT_NOTE]);
 
@@ -515,6 +524,15 @@ test('a buyer without a country is reported instead of XML', function () {
     expect($result->isValid())->toBeFalse()
         ->and($result->xml())->toBeNull()
         ->and($result->missingRequirementKeys())->toBe(['buyer_country']);
+});
+
+test('a seller with only a national tax number is reported — BR-CO-26 needs the VAT identifier', function () {
+    $this->company->update(['vat_id' => null]);
+
+    $result = $this->builder->build($this->invoice->fresh());
+
+    expect($result->isValid())->toBeFalse()
+        ->and($result->missingRequirementKeys())->toBe(['seller_tax_registration']);
 });
 
 test('several gaps are reported together, each named once', function () {

@@ -17,11 +17,12 @@ const globalStore = useGlobalStore()
  * build. The server decides whether this instance qualifies; the tab only
  * renders the verdict.
  */
-const isAvailable = computed<boolean>(() => globalStore.einvoice?.available === true)
+const isAvailable = computed<boolean>(() => globalStore.eInvoice?.available === true)
 
-const requiredPdfDriver = computed<string>(
-  () => globalStore.einvoice?.required_pdf_driver ?? 'gotenberg'
-)
+const requiredPdfDriver = computed<string>(() => {
+  const driver = globalStore.eInvoice?.required_pdf_driver ?? 'gotenberg'
+  return driver.charAt(0).toUpperCase() + driver.slice(1)
+})
 
 const isSaving = ref<boolean>(false)
 
@@ -156,7 +157,6 @@ async function submitForm(): Promise<void> {
         p-4
         text-sm text-alert-warning-text
       "
-      data-testid="einvoice-driver-hint"
     >
       <BaseIcon name="ExclamationTriangleIcon" class="w-5 h-5 mr-2 shrink-0" />
       <span>
@@ -187,7 +187,7 @@ async function submitForm(): Promise<void> {
     <BaseDivider class="mt-2 mb-6" />
 
     <form action="" @submit.prevent="submitForm">
-      <h6 class="text-heading text-base font-medium">
+      <h6 class="text-heading text-lg font-medium">
         {{ $t('settings.e_invoice.bank_details') }}
       </h6>
       <p class="mt-1 mb-6 text-sm text-muted">
@@ -241,16 +241,11 @@ async function submitForm(): Promise<void> {
       <BaseButton
         :disabled="isSaving || !isAvailable"
         :loading="isSaving"
-        variant="primary"
         type="submit"
         class="mt-6"
       >
         <template #left="slotProps">
-          <BaseIcon
-            v-if="!isSaving"
-            :class="slotProps.class"
-            name="ArrowDownOnSquareIcon"
-          />
+          <BaseIcon :class="slotProps.class" name="ArrowDownOnSquareIcon" />
         </template>
         {{ $t('general.save') }}
       </BaseButton>

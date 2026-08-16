@@ -456,7 +456,7 @@ const eInvoiceFallback = computed<boolean>(() => eInvoiceReadiness.value?.fallba
  */
 const issuesEInvoices = computed<boolean>(
   () =>
-    globalStore.einvoice?.available === true &&
+    globalStore.eInvoice?.available === true &&
     companyStore.selectedCompanySettings.einvoice_enabled === 'YES'
 )
 

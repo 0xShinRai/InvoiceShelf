@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { required, minLength, helpers } from '@vuelidate/validators'
 import useVuelidate from '@vuelidate/core'
 import { useModalStore } from '@/scripts/stores/modal.store'
+import { useGlobalStore } from '@/scripts/stores/global.store'
 import {
   useItemStore,
   DEFAULT_UNIT_CODE,
@@ -16,6 +17,7 @@ interface ItemUnitForm {
 }
 
 const modalStore = useModalStore()
+const globalStore = useGlobalStore()
 const itemStore = useItemStore()
 const { t } = useI18n()
 
@@ -33,7 +35,7 @@ const modalActive = computed<boolean>(
 )
 
 const unitCodeOptions = computed(() =>
-  itemStore.unitCodes.map((option) => ({
+  globalStore.unitCodes.map((option) => ({
     value: option.value,
     label: `${t(option.key)} (${option.value})`,
   }))
@@ -55,7 +57,9 @@ const rules = computed(() => ({
 const v$ = useVuelidate(rules, currentItemUnit)
 
 async function setInitialData(): Promise<void> {
-  await itemStore.fetchUnitCodes()
+  if (!globalStore.unitCodes.length) {
+    await globalStore.fetchConfig({ key: 'unit_codes' })
+  }
 
   if (modalStore.data && typeof modalStore.data === 'number') {
     isEdit.value = true

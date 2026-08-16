@@ -151,7 +151,7 @@ function readinessInvoice(Company $company, Customer $customer): Invoice
 }
 
 test('the readiness endpoint reports a company with complete master data as ready', function () {
-    getJson('/api/v1/einvoice/readiness')
+    getJson('/api/v1/e-invoice/readiness')
         ->assertOk()
         ->assertExactJson([
             'available' => true,
@@ -166,7 +166,7 @@ test('the readiness endpoint names exactly the master data that is missing', fun
     CompanySetting::setSettings([EInvoiceSettings::IBAN => ''], $this->company->id);
     $this->company->address()->update(['country_id' => null, 'zip' => null]);
 
-    getJson('/api/v1/einvoice/readiness')
+    getJson('/api/v1/e-invoice/readiness')
         ->assertOk()
         ->assertJson([
             'ready' => false,
@@ -177,7 +177,7 @@ test('the readiness endpoint names exactly the master data that is missing', fun
 test('an IBAN that is not one at all counts as missing', function () {
     CompanySetting::setSettings([EInvoiceSettings::IBAN => 'not-an-iban'], $this->company->id);
 
-    getJson('/api/v1/einvoice/readiness')
+    getJson('/api/v1/e-invoice/readiness')
         ->assertOk()
         ->assertJson([
             'ready' => false,
@@ -188,7 +188,7 @@ test('an IBAN that is not one at all counts as missing', function () {
 test('the readiness endpoint reports e-invoicing as unavailable under a non gotenberg pdf driver', function () {
     config()->set('pdf.driver', 'dompdf');
 
-    getJson('/api/v1/einvoice/readiness')
+    getJson('/api/v1/e-invoice/readiness')
         ->assertOk()
         ->assertJson([
             'available' => false,
@@ -204,7 +204,7 @@ test('readiness is scoped to the company the request is made for', function () {
 
     $this->withHeaders(['company' => $otherCompany->id]);
 
-    getJson('/api/v1/einvoice/readiness')
+    getJson('/api/v1/e-invoice/readiness')
         ->assertOk()
         ->assertJson([
             'enabled' => false,
@@ -223,7 +223,7 @@ test('readiness is scoped to the company the request is made for', function () {
 test('a complete invoice reports no fallback and no missing requirements', function () {
     $invoice = readinessInvoice($this->company, readinessCustomer($this->company->id));
 
-    getJson("/api/v1/invoices/{$invoice->id}/einvoice-readiness")
+    getJson("/api/v1/invoices/{$invoice->id}/e-invoice-readiness")
         ->assertOk()
         ->assertExactJson([
             'available' => true,
@@ -241,7 +241,7 @@ test('an invoice that would fall back names the requirements it does not meet', 
 
     $invoice = readinessInvoice($this->company, $customer->fresh());
 
-    getJson("/api/v1/invoices/{$invoice->id}/einvoice-readiness")
+    getJson("/api/v1/invoices/{$invoice->id}/e-invoice-readiness")
         ->assertOk()
         ->assertJson([
             'ready' => false,
@@ -258,7 +258,7 @@ test('an invoice of a company that has not enabled e-invoicing never falls back'
 
     $invoice = readinessInvoice($this->company, $customer->fresh());
 
-    getJson("/api/v1/invoices/{$invoice->id}/einvoice-readiness")
+    getJson("/api/v1/invoices/{$invoice->id}/e-invoice-readiness")
         ->assertOk()
         ->assertJson([
             'enabled' => false,
@@ -273,6 +273,6 @@ test('the invoice readiness of a company the user does not belong to is not read
         'company_id' => Company::factory()->create()->id,
     ]);
 
-    getJson("/api/v1/invoices/{$invoice->id}/einvoice-readiness")
+    getJson("/api/v1/invoices/{$invoice->id}/e-invoice-readiness")
         ->assertForbidden();
 });

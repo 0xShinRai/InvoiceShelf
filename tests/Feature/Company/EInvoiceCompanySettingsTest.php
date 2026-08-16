@@ -94,7 +94,7 @@ test('bootstrap reports e-invoicing as unavailable under a non gotenberg pdf dri
     getJson('/api/v1/bootstrap')
         ->assertOk()
         ->assertJson([
-            'einvoice' => [
+            'e_invoice' => [
                 'available' => false,
                 'required_pdf_driver' => 'gotenberg',
             ],
@@ -107,7 +107,7 @@ test('bootstrap reports e-invoicing as available under the gotenberg pdf driver'
     getJson('/api/v1/bootstrap')
         ->assertOk()
         ->assertJson([
-            'einvoice' => [
+            'e_invoice' => [
                 'available' => true,
                 'required_pdf_driver' => 'gotenberg',
             ],

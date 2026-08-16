@@ -38,7 +38,7 @@ export interface BootstrapResponse {
   setting_menu: MenuItem[]
   config: Record<string, unknown>
   global_settings: Record<string, string>
-  einvoice: EInvoiceContext
+  e_invoice: EInvoiceContext
   modules: string[]
   user_menu?: Array<{ title: string; link: string; icon: string; priority: number; name: string }>
   admin_mode?: boolean

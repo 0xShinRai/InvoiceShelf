@@ -44,7 +44,6 @@ const requirements = computed<string[]>(() =>
   <div
     v-if="ready"
     class="flex items-start rounded-md bg-alert-success-bg p-4 text-sm text-alert-success-text"
-    data-testid="einvoice-ready"
   >
     <BaseIcon name="CheckCircleIcon" class="w-5 h-5 mr-2 shrink-0" />
     <div>
@@ -56,7 +55,6 @@ const requirements = computed<string[]>(() =>
   <div
     v-else
     class="flex items-start rounded-md bg-alert-warning-bg p-4 text-sm text-alert-warning-text"
-    data-testid="einvoice-not-ready"
   >
     <BaseIcon name="ExclamationTriangleIcon" class="w-5 h-5 mr-2 shrink-0" />
     <div>

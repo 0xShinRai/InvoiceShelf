@@ -23,12 +23,14 @@ class BootstrapController extends Controller
 {
     use GeneratesMenu;
 
+    public function __construct(private readonly EInvoiceSettings $einvoiceSettings) {}
+
     /**
      * Handle the incoming request.
      *
      * @return JsonResponse
      */
-    public function __invoke(Request $request, EInvoiceSettings $einvoice_settings)
+    public function __invoke(Request $request)
     {
         $current_user = $request->user();
         $current_user_settings = $current_user->getAllSettings();
@@ -51,7 +53,7 @@ class BootstrapController extends Controller
             'show_sidebar_group_labels',
         ]);
 
-        $einvoice_context = $einvoice_settings->context();
+        $einvoice_context = $this->einvoiceSettings->context();
 
         // Super admin mode — return admin-only menu with all companies listed
         if ($current_user->isSuperAdmin() && $request->has('admin_mode')) {
@@ -65,7 +67,7 @@ class BootstrapController extends Controller
                 'current_company_currency' => Currency::first(),
                 'config' => config('invoiceshelf'),
                 'global_settings' => $global_settings,
-                'einvoice' => $einvoice_context,
+                'e_invoice' => $einvoice_context,
                 'main_menu' => $this->generateMenu('admin_menu', $current_user),
                 'setting_menu' => [],
                 'modules' => [],
@@ -86,7 +88,7 @@ class BootstrapController extends Controller
                 'current_company_currency' => Currency::first(),
                 'config' => config('invoiceshelf'),
                 'global_settings' => $global_settings,
-                'einvoice' => $einvoice_context,
+                'e_invoice' => $einvoice_context,
                 'main_menu' => [],
                 'setting_menu' => [],
                 'modules' => [],
@@ -135,7 +137,7 @@ class BootstrapController extends Controller
             'current_company_currency' => $current_company_currency,
             'config' => config('invoiceshelf'),
             'global_settings' => $global_settings,
-            'einvoice' => $einvoice_context,
+            'e_invoice' => $einvoice_context,
             'main_menu' => $main_menu,
             'setting_menu' => $setting_menu,
             'modules' => Module::where('enabled', true)->pluck('name'),

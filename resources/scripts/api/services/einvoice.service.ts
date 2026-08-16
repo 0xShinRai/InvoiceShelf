@@ -28,7 +28,7 @@ export const einvoiceService = {
   },
 
   async invoiceReadiness(id: number): Promise<InvoiceEInvoiceReadiness> {
-    const { data } = await client.get(`${API.INVOICES}/${id}/einvoice-readiness`)
+    const { data } = await client.get(`${API.INVOICES}/${id}/e-invoice-readiness`)
     return data
   },
 }

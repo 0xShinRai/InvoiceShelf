@@ -6,8 +6,8 @@ use App\Domains\Contacts\Models\Address;
 use App\Domains\Contacts\Models\Country;
 use App\Domains\Contacts\Models\Customer;
 use App\Domains\Money\Models\Currency;
-use App\Domains\Sales\Application\EInvoiceAttachmentResolver;
-use App\Domains\Sales\Application\EInvoiceSettings;
+use App\Domains\Sales\Application\EInvoice\EInvoiceSettings;
+use App\Domains\Sales\Contracts\InvoicePdfAttachmentResolver;
 use App\Domains\Sales\Models\Invoice;
 use App\Domains\Taxation\Models\Tax;
 use App\Domains\Taxation\Models\TaxType;
@@ -204,7 +204,7 @@ beforeEach(function () {
  * made".
  */
 test('a real gotenberg turns the seeded invoice into a hybrid pdf', function () {
-    $attachment = app(EInvoiceAttachmentResolver::class)->resolve($this->invoice);
+    $attachment = app(InvoicePdfAttachmentResolver::class)->resolve($this->invoice);
 
     expect($attachment)->toBeInstanceOf(FacturXAttachment::class)
         ->and($attachment->profile)->toBe(FacturXAttachment::PROFILE_EN_16931);

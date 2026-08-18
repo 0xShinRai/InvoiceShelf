@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domains\Sales\Application;
+namespace App\Domains\Sales\Application\EInvoice;
 
+use App\Domains\Sales\Contracts\InvoicePdfAttachmentResolver;
 use App\Domains\Sales\Models\Invoice;
 use App\Platform\Pdf\Rendering\FacturXAttachment;
 use Throwable;
@@ -20,9 +21,14 @@ use Throwable;
  * returned XML that passed XSD validation. Anything else yields null, which is
  * the ordinary PDF.
  *
+ * The invoice pipeline reaches this class only through the
+ * InvoicePdfAttachmentResolver contract it implements — everything under this
+ * EInvoice namespace stays behind that seam, so moving it into a module means
+ * moving the binding, not touching the pipeline.
+ *
  * @see docs/architecture/0002-einvoice-gotenberg-container-horstoeko-xml.md
  */
-class EInvoiceAttachmentResolver
+class EInvoiceAttachmentResolver implements InvoicePdfAttachmentResolver
 {
     public function __construct(
         private readonly EInvoiceSettings $settings,

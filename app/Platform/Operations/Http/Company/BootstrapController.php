@@ -9,7 +9,7 @@ use App\Domains\Accounts\Models\Company;
 use App\Domains\Accounts\Models\CompanyInvitation;
 use App\Domains\Accounts\Models\CompanySetting;
 use App\Domains\Money\Models\Currency;
-use App\Domains\Sales\Application\EInvoiceSettings;
+use App\Domains\Sales\Application\EInvoice\EInvoiceSettings;
 use App\Platform\Http\Controller;
 use App\Platform\Modules\Models\Module;
 use App\Platform\Operations\Http\Concerns\GeneratesMenu;

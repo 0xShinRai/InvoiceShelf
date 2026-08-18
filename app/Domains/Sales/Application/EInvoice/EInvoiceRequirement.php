@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Sales\Application;
+namespace App\Domains\Sales\Application\EInvoice;
 
 /**
  * One thing an invoice still needs before it can become an E-Invoice.

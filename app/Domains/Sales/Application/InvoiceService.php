@@ -9,6 +9,7 @@ use App\Domains\Metadata\Contracts\CustomFieldValueWriter;
 use App\Domains\Metadata\Models\CustomField;
 use App\Domains\Sales\Contracts\DocumentExchangeRateRecorder;
 use App\Domains\Sales\Contracts\InvoiceEmailSender;
+use App\Domains\Sales\Contracts\InvoicePdfAttachmentResolver;
 use App\Domains\Sales\Contracts\InvoicePdfDataProvider;
 use App\Domains\Sales\Mail\SendInvoiceMail;
 use App\Domains\Sales\Models\Estimate;
@@ -32,7 +33,7 @@ class InvoiceService implements InvoicePdfDataProvider
         private readonly CustomFieldValueWriter $customFieldValueWriter,
         private readonly DocumentExchangeRateRecorder $exchangeRateRecorder,
         private readonly InvoiceEmailSender $invoiceEmailSender,
-        private readonly EInvoiceAttachmentResolver $eInvoiceAttachments,
+        private readonly InvoicePdfAttachmentResolver $eInvoiceAttachments,
     ) {}
 
     /**

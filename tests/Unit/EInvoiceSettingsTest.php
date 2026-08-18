@@ -2,7 +2,7 @@
 
 use App\Domains\Accounts\Models\Company;
 use App\Domains\Accounts\Models\CompanySetting;
-use App\Domains\Sales\Application\EInvoiceSettings;
+use App\Domains\Sales\Application\EInvoice\EInvoiceSettings;
 use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function () {

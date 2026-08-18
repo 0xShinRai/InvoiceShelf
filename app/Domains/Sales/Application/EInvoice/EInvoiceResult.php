@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Sales\Application;
+namespace App\Domains\Sales\Application\EInvoice;
 
 use InvalidArgumentException;
 

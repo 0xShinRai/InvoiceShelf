@@ -3,7 +3,7 @@
 namespace App\Domains\Sales\Http\Controllers\Company;
 
 use App\Domains\Accounts\Models\Company;
-use App\Domains\Sales\Application\EInvoiceReadiness;
+use App\Domains\Sales\Application\EInvoice\EInvoiceReadiness;
 use App\Domains\Sales\Models\Invoice;
 use App\Platform\Http\Controller;
 use Illuminate\Http\JsonResponse;

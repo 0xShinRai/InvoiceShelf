@@ -6,7 +6,7 @@ use App\Domains\Contacts\Models\Address;
 use App\Domains\Contacts\Models\Country;
 use App\Domains\Contacts\Models\Customer;
 use App\Domains\Money\Models\Currency;
-use App\Domains\Sales\Application\EInvoiceSettings;
+use App\Domains\Sales\Application\EInvoice\EInvoiceSettings;
 use App\Domains\Sales\Application\InvoiceService;
 use App\Domains\Sales\Models\Invoice;
 use App\Domains\Taxation\Models\Tax;
